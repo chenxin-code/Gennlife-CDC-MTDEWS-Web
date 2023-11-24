@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="28px" height="30px" viewBox="0 0 28 30" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>形状</title>
+    <defs>
+        <linearGradient x1="31.895225%" y1="93.8024581%" x2="24.084359%" y2="0%" id="linearGradient-1">
+            <stop stop-color="#FFA83B" offset="0%"></stop>
+            <stop stop-color="#FFEA00" offset="100%"></stop>
+        </linearGradient>
+        <path d="M180.977778,4 C185.804444,5.5235 190.355556,6.2858 190.402222,6.2385 C190.724444,6.2858 191,6.6675 191,6.9997 L191,15.5247 C191,15.6193 190.907778,17.4761 189.666667,19.6662 C188.977778,20.9532 187.505556,22.095 186.355556,23.0949 C184.931111,24.3335 183.23,25.2861 181.206667,25.9527 L181.023333,26 L180.838889,25.9527 C178.816667,25.2861 177.068889,24.3335 175.643333,23.0949 C174.494444,22.095 173.023333,20.9521 172.333333,19.6662 C171.137778,17.5234 171,15.6666 171,15.572 L171,7.0481 C171,6.6664 171.275556,6.3331 171.597778,6.2858 C171.597778,6.2858 176.838889,5.5235 180.976667,4 L180.977778,4 Z M180.481111,9.4285 C179.936667,9.4285 179.342222,9.8245 179.193333,10.3712 L177.658889,14.934 C177.51,15.4807 177.807778,15.8767 178.352222,15.8767 L180.085556,15.8767 L179.094444,19.994 C178.945556,20.5396 179.144444,20.5891 179.491111,20.192 L184.144444,14.736 C184.837778,13.9429 184.54,13.2477 183.451111,13.2477 L181.322222,13.2477 L182.56,10.3217 C182.757778,9.8256 182.511111,9.4285 181.965556,9.4285 L180.481111,9.4285 Z" id="path-2"></path>
+        <filter x="-35.0%" y="-22.7%" width="170.0%" height="163.6%" filterUnits="objectBoundingBox" id="filter-3">
+            <feOffset dx="0" dy="2" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 1   0 0 0 0 0.88627451   0 0 0 0 0.031372549  0 0 0 0.1 0" type="matrix" in="shadowBlurOuter1"></feColorMatrix>
+        </filter>
+    </defs>
+    <g id="多点触控" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g transform="translate(-4786.000000, -1053.000000)" fill-rule="nonzero" id="编组-44">
+            <g transform="translate(4619.000000, 1051.000000)" id="形状">
+                <use fill="black" fill-opacity="1" filter="url(#filter-3)" xlink:href="#path-2"></use>
+                <use fill="url(#linearGradient-1)" xlink:href="#path-2"></use>
+            </g>
+        </g>
+    </g>
+</svg>

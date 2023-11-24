@@ -1,0 +1,52 @@
+// :root {
+//   --pageWidth: 120; // ui图宽度 rem  16px
+//   --pageHeight: 67.5; // ui图高度 rem  16px
+// }
+
+// @media (min-width: 2000px) {
+//   :root {
+//     --pageWidth: 243.75; // ui图宽度 rem  16px 3240
+//     --pageHeight: 81.25; // ui图高度 rem  16px 1080
+//   }
+// }
+
+// 原来的 3240 * 1080  16px
+// $pageWidth: 243.75 * 352.5 / 243.75;
+// $pageHeight: 81.25 * 117.5 / 81.25;
+
+// 现在的  5640 * 1880 16px
+$pageWidth: 352.5;
+$pageHeight: 117.5;
+
+// 定义混合宏
+// 修改字体
+@function getFontSize($size) {
+  @return $size * 12px;
+}
+// 修改宽度
+@function getWidth($size) {
+  // @return #{$size}rem;
+  // @return $size * 16px;
+  @return #{$size / $pageWidth * 100}vw; // 取百分比
+}
+// 修改高度
+@function getHeight($size) {
+  // @return #{$size}rem;
+  // @return $size * 16px;
+  @return #{$size / $pageHeight * 100}vh; // 取百分比
+}
+
+/**
+ * 定义字体
+ */
+$nomalSize: getFontSize(1.5); // 普通字体大小
+$pageHeaderSize: getFontSize(3.38); // 页面主标题
+$itemTitleSize: getFontSize(1.69); // 小模块 标题
+$digiFontSize: getFontSize(4.69); // 电子屏字体
+$nomalSmallSize: getFontSize(1.31); // 普通字体大小
+
+// 修改字体最小限制
+// * {
+//   -webkit-transform-origin-x: 0;
+//   -webkit-transform: scale(0.9);
+// }

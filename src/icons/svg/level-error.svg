@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="40px" height="42px" viewBox="0 0 40 42" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>形状</title>
+    <defs>
+        <filter x="-115.0%" y="-104.5%" width="330.0%" height="309.1%" filterUnits="objectBoundingBox" id="filter-1">
+            <feOffset dx="0" dy="2" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="5" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0.97254902   0 0 0 0 0.266666667   0 0 0 0 0.466666667  0 0 0 0.3 0" type="matrix" in="shadowBlurOuter1" result="shadowMatrixOuter1"></feColorMatrix>
+            <feMerge>
+                <feMergeNode in="shadowMatrixOuter1"></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+            </feMerge>
+        </filter>
+        <linearGradient x1="50%" y1="124.405743%" x2="50%" y2="0%" id="linearGradient-2">
+            <stop stop-color="#F52B7B" offset="0%"></stop>
+            <stop stop-color="#FF7C6E" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="多点触控" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g transform="translate(-4807.000000, -299.000000)" fill="url(#linearGradient-2)" fill-rule="nonzero" id="编组-44">
+            <g transform="translate(4619.000000, 303.000000)">
+                <g id="编组" filter="url(#filter-1)" transform="translate(198.000000, 4.000000)">
+                    <path d="M9.97777778,0 C14.8044444,1.5235 19.3555556,2.2858 19.4022222,2.2385 C19.7244444,2.2858 20,2.6675 20,2.9997 L20,11.5247 C20,11.6193 19.9077778,13.4761 18.6666667,15.6662 C17.9777778,16.9532 16.5055556,18.095 15.3555556,19.0949 C13.9311111,20.3335 12.23,21.2861 10.2066667,21.9527 L10.0233333,22 L9.83888889,21.9527 C7.81666667,21.2861 6.06888889,20.3335 4.64333333,19.0949 C3.49444444,18.095 2.02333333,16.9521 1.33333333,15.6662 C0.137777778,13.5234 0,11.6666 0,11.572 L0,3.0481 C0,2.6664 0.275555556,2.3331 0.597777778,2.2858 C0.597777778,2.2858 5.83888889,1.5235 9.97666667,0 L9.97777778,0 Z M9.48111111,5.4285 C8.93666667,5.4285 8.34222222,5.8245 8.19333333,6.3712 L6.65888889,10.934 C6.51,11.4807 6.80777778,11.8767 7.35222222,11.8767 L9.08555556,11.8767 L8.09444444,15.994 C7.94555556,16.5396 8.14444444,16.5891 8.49111111,16.192 L13.1444444,10.736 C13.8377778,9.9429 13.54,9.2477 12.4511111,9.2477 L10.3222222,9.2477 L11.56,6.3217 C11.7577778,5.8256 11.5111111,5.4285 10.9655556,5.4285 L9.48111111,5.4285 Z" id="形状"></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

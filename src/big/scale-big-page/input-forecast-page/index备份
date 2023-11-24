@@ -1,0 +1,848 @@
+<template>
+  <div class="container">
+    <div class="left">
+      <div class="l-top">
+        <div class="title">
+          <div class="triangle" />
+          未来30天{{ leftTopParam.country }}本地疫情走势
+        </div>
+        <line-chart :data="leftTopData" />
+      </div>
+      <div class="l-center">
+        <div class="title">
+          <div class="triangle" />
+          当日境外入粤人员管控情况
+        </div>
+        <el-carousel
+          indicator-position="none"
+          arrow="never"
+          direction="vertical"
+          @change="leftCenterChange"
+        >
+          <el-carousel-item
+            v-for="item in leftCenterParam.pageCount"
+            :key="item"
+          >
+            <item-list1 :data="leftCenterData" :config="leftCenterConfig" />
+          </el-carousel-item>
+        </el-carousel>
+      </div>
+      <div class="l-bottom">
+        <div class="title">
+          <div class="triangle" />
+          累计境外入粤人员管控情况
+        </div>
+        <el-carousel
+          indicator-position="none"
+          arrow="never"
+          direction="vertical"
+        >
+          <el-carousel-item
+            v-for="item in leftCenterParam.pageCount"
+            :key="item"
+          >
+            <item-list1 :data="leftBottomData" :config="leftBottomConfig" />
+          </el-carousel-item>
+        </el-carousel>
+      </div>
+    </div>
+    <div class="center">
+      <true-scatter-map
+        :data="rightBottomData"
+        :country="leftTopParam.country"
+        :days="days"
+        @click="mapClick"
+      />
+    </div>
+    <div class="right">
+      <div class="r-top">
+        <div class="r-t-left">
+          <div class="title">
+            <div class="triangle" />
+            酒店上报阳性率
+          </div>
+
+          <div class="search-item">
+            <el-select
+              v-model="rightTopCurrentData.city"
+              placeholder="请选择城市"
+              @change="choiceCity"
+            >
+              <el-option
+                v-for="item in uniq(rightTopFitrer.city)"
+                :key="item"
+                :label="item"
+                :value="item"
+              />
+            </el-select>
+            <el-select
+              v-model="rightTopCurrentData.hotel_name"
+              placeholder="请选择酒店"
+              @change="choiceData"
+            >
+              <el-option
+                v-for="item in uniq(rightTopFitrer.hotel_name)"
+                :key="item"
+                :label="item"
+                :value="item"
+              />
+            </el-select>
+          </div>
+
+          <div class="content">
+            <div class="ceshi4">
+              <div class="chart-item ceshi1">
+                <ring-chart
+                  :color="['RGBA(255, 234, 0, 1.00)', 'RGBA(50, 53, 89, 1.00)']"
+                  :data="[
+                    {
+                      name: '阳性人数',
+                      value: rightTopCurrentData.man_positive
+                    },
+                    { name: '检测人数', value: rightTopCurrentData.man_all }
+                  ]"
+                />
+                <div class="label">
+                  入境工作人员
+                </div>
+              </div>
+              <div class="chart-item ceshi2">
+                <ring-chart
+                  :color="['RGBA(0, 232, 255, 1.00)', 'RGBA(50, 53, 89, 1.00)']"
+                  :data="[
+                    { name: '阳性人数', value: rightTopCurrentData.man_work_y },
+                    { name: '检测人数', value: rightTopCurrentData.man_work }
+                  ]"
+                />
+                <div class="label">
+                  酒店工作人员
+                </div>
+              </div>
+            </div>
+
+            <div class="chart-item ceshi3">
+              <pictorial-bar
+                :color="['RGBA(91, 192, 87, 1.00)', 'RGBA(50, 53, 89, 1.00)']"
+                :data="[
+                  { name: '阳性人数', value: rightTopCurrentData.sample_num_y },
+                  { name: '检测人数', value: rightTopCurrentData.sample_num }
+                ]"
+              />
+              <div class="label">
+                隔离酒店环境样本
+              </div>
+              <pictorial-bar
+                :data1="[
+                  { name: '阳性人数', value: 100 },
+                  { name: '检测人数', value: 400 }
+                ]"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="r-t-right">
+          <div class="title">
+            <div class="triangle" />
+            各国入粤风险排名
+          </div>
+
+          <div class="search-content-item">
+            <div class="label">
+              <div class="label-left">过去T天内的风险值（1，21）</div>
+              <div class="label-right">{{ rightBottomParam.t }}</div>
+            </div>
+            <el-slider
+              v-model="rightBottomParam.t"
+              :min="1"
+              :max="21"
+              :step="1"
+            />
+          </div>
+
+          <item-list1
+            :sort="true"
+            :data="rightBottomData"
+            :config="rightBottomConfig"
+          />
+        </div>
+      </div>
+      <div class="r-bottom">
+        <div class="title">
+          <div class="triangle" />
+          未来两周境外输入广东省人数统计
+        </div>
+        <compact-bar :data="centerBottomData" />
+      </div>
+    </div>
+
+    <el-dialog
+      v-if="dialogVisible"
+      class="input-forecast"
+      :destroy-on-close="true"
+      :visible="dialogVisible"
+      :append-to-body="true"
+      :title="
+        targetData && targetData.modelName === 'diversion'
+          ? '入境人员分流方案'
+          : targetData && targetData.modelName === 'isolation'
+            ? '入境隔离策略调整及预测'
+            : '香港豁免人员输入风险评估'
+      "
+      @close="dialogClose"
+    >
+      <diversion v-if="targetData && targetData.modelName === 'diversion'" />
+      <isolation v-if="targetData && targetData.modelName === 'isolation'" />
+      <hongkong v-if="targetData && targetData.modelName === 'hongkong'" />
+    </el-dialog>
+  </div>
+</template>
+
+<script>
+import LineChart from './components/LineChart'
+import CompactBar from './components/CompactBar'
+import ItemList1 from './components/ItemList1'
+import TrueScatterMap from './components/TrueScatterMap'
+import RingChart from './components/RingChart'
+// import Diversion from './components/Diversion'
+import Diversion from './components/Diversion2'
+import Isolation from './components/Isolation'
+import Hongkong from './components/Hongkong'
+import PictorialBar from './components/PictorialBar'
+
+import {
+  accumulateCase, // 高风险国家未来累计感染人数趋势预测
+  overseasRiskControl, // 境外输入风险评估及分级
+  riskAssessment, // 境外输入风险评估
+  hotelIsolation, // 酒店隔离情况信息
+  inboundNum // 未来两周境外输入人数
+} from '@/api/input-forecast'
+
+import { random, uniq } from 'lodash'
+
+export default {
+  components: {
+    LineChart,
+    CompactBar,
+    ItemList1,
+    TrueScatterMap,
+    RingChart,
+    Diversion,
+    Isolation,
+    Hongkong,
+    PictorialBar
+  },
+  props: {
+    targetData: {
+      type: Object,
+      default() {
+        return 'diversion'
+      }
+    }
+  },
+  data() {
+    return {
+      model: '',
+
+      leftTopParam: { country: '美国' },
+      leftTopData: {},
+      leftCenterData: [],
+      leftCenterConfig: [
+        { label: '境外国家', field: 'country' },
+        { label: '输入人数', field: 'import_cases' },
+        { label: '集中隔离', field: 'c_cases' },
+        { label: '居家隔离', field: 'f_cases' },
+        { label: '解除集中隔离', field: 'no_c_cases' },
+        { label: '解除居家隔离', field: 'no_f_cases' }
+      ],
+      leftBottomData: [],
+      leftBottomConfig: [
+        { label: '境外国家', field: 'country' },
+        { label: '输入人数', field: 'all_import_cases' },
+        { label: '集中隔离', field: 'all_c_cases' },
+        { label: '居家隔离', field: 'all_f_cases' },
+        { label: '解除集中隔离', field: 'all_no_c_cases' },
+        { label: '解除居家隔离', field: 'all_no_f_cases' }
+      ],
+      leftCenterParam: {
+        t: 14,
+        pageCount: 1
+      },
+
+      rightBottomParam: {
+        t: 14
+      },
+      rightBottomData: [], // classgrade:超高风险name:香港risk:100
+      rightBottomConfig: [
+        { label: '国家', field: 'name' },
+        { label: '风险值', field: 'risk' },
+        { label: '风险等级', field: 'classgrade' }
+      ],
+      centerBottomData: [],
+
+      allRightTopData: [],
+      rightTopFitrer: {
+        city: [],
+        hotel_name: []
+      },
+      rightTopCurrentData: {
+        city: '',
+        hotel_name: '',
+        man_all: 0,
+        man_positive: 0,
+        man_work: 0,
+        man_work_y: 0,
+        sample_num: 0,
+        sample_num_y: 0
+      },
+
+      dialogVisible: false,
+      days: '',
+
+      time: null
+    }
+  },
+  watch: {
+    rightBottomParam: {
+      deep: true,
+      handler() {
+        this.initRightBottom()
+      }
+    },
+    targetData: {
+      deep: true,
+      handler(val, oldVal) {
+        this.dialogVisible = true
+      }
+    }
+  },
+  mounted() {
+    this.initLeftTop()
+    this.initLeftCenter()
+    this.initCenterBottom()
+    this.initRightBottom()
+    this.initRightTop()
+
+    this.timer = null
+    // 大屏动态事件
+    const moveFunc = () => {
+      if (this.timer) return
+      this.timer = setInterval(() => {
+        // 右上角 更改数据
+        const randomIndex = random(0, this.allRightTopData.length - 1)
+        this.rightTopCurrentData = Object.assign(
+          {},
+          this.allRightTopData[randomIndex]
+        )
+
+        // 右下角 更改数据
+        this.rightBottomParam.t = random(1, 21)
+
+        // 地图数据
+        this.leftTopParam.country = this.rightBottomData[
+          random(0, this.rightBottomData.length - 1)
+        ].name
+        this.initLeftTop()
+      }, 5000)
+    }
+    moveFunc()
+
+    // 鼠标移动， 停止移动
+    document.onmousemove = () => {
+      clearInterval(this.timer)
+      this.timer = null
+      setTimeout(() => {
+        moveFunc()
+      }, 5000)
+    }
+
+    // 销毁动态事件
+    this.$once('hook:beforeDestroy', () => {
+      clearInterval(this.timer)
+      this.timer = null
+    })
+  },
+  beforeDestroy() {
+    clearInterval(this.timer)
+    this.timer = null
+  },
+
+  methods: {
+    uniq,
+    initLeftTop() {
+      accumulateCase(this.leftTopParam).then(res => {
+        this.leftTopData = res.data[0]
+      })
+    },
+    initLeftCenter() {
+      overseasRiskControl(this.leftCenterParam).then(res => {
+        this.leftCenterData = res.data
+        this.leftBottomData = res.data
+        this.leftCenterParam.pageCount = res.pagination.pages
+      })
+    },
+    initCenterBottom() {
+      inboundNum({ update_date: '2020-8-15' }).then(res => {
+        this.centerBottomData = res.data
+        this.days = res.days
+      })
+    },
+    initRightBottom() {
+      riskAssessment(this.rightBottomParam).then(res => {
+        this.rightBottomData = res.data
+      })
+    },
+    initRightTop() {
+      hotelIsolation({}).then(res => {
+        this.allRightTopData = res.data
+        this.rightTopFitrer.city = res.data.map(v => v.city)
+        this.rightTopFitrer.hotel_name = res.data.map(v => v.hotel_name)
+        this.rightTopCurrentData = Object.assign({}, res.data[0])
+      })
+    },
+    choiceCity() {
+      let index = -1
+      for (let i = 0; i < this.allRightTopData.length; i++) {
+        if (this.allRightTopData[i].city === this.rightTopCurrentData.city) {
+          index = i
+          break
+        }
+      }
+      this.rightTopCurrentData = Object.assign({}, this.allRightTopData[index])
+    },
+    choiceData() {
+      let index = -1
+      for (let i = 0; i < this.allRightTopData.length; i++) {
+        if (
+          this.allRightTopData[i].city === this.rightTopCurrentData.city &&
+          this.allRightTopData[i].hotel_name ===
+            this.rightTopCurrentData.hotel_name
+        ) {
+          index = i
+          break
+        }
+      }
+      if (index === -1) {
+        this.rightTopCurrentData = {
+          city: '',
+          hotel_name: '',
+          man_all: 0,
+          man_positive: 0,
+          man_work: 0,
+          man_work_y: 0,
+          sample_num: 0,
+          sample_num_y: 0
+        }
+        return
+      }
+      this.rightTopCurrentData = Object.assign({}, this.allRightTopData[index])
+    },
+    // 切换下一页
+    leftCenterChange(index) {
+      this.leftCenterParam.page = index + 1
+      this.initLeftCenter()
+    },
+    mapClick(country) {
+      this.leftTopParam.country = country
+      this.initLeftTop()
+    },
+    dialogClose() {
+      this.dialogVisible = false
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+@import "~@/styles/big.scss";
+
+.container {
+  display: flex;
+  padding: getHeight(2) getWidth(2);
+  box-sizing: border-box;
+
+  .left {
+    width: getWidth(69.44);
+    flex: none;
+    // flex: 116.75;
+    height: 100%;
+  }
+  .right {
+    width: getWidth(116.75);
+    flex: none;
+    // flex: 116.75;
+    height: 100%;
+  }
+  .center {
+    width: 100%;
+    position: relative;
+  }
+}
+
+.left {
+  display: flex;
+  flex-direction: column;
+
+  > div + div {
+    margin-top: getHeight(1.2);
+  }
+
+  .l-top,
+  .l-center,
+  .l-bottom {
+    width: 100%;
+    background: #212342;
+    border-radius: getWidth(1) getHeight(1);
+    padding: getWidth(2) getHeight(2);
+  }
+
+  .l-top {
+    height: getHeight(36.75);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .l-center {
+    height: getHeight(29);
+  }
+  .l-bottom {
+    height: getHeight(37.19);
+  }
+
+  .l-center,
+  .l-bottom {
+    display: flex;
+    flex-direction: column;
+    ::v-deep {
+      .el-carousel {
+        height: 100%;
+        .el-carousel__container {
+          height: 100%;
+        }
+      }
+    }
+  }
+}
+
+.right {
+  display: flex;
+  flex-direction: column;
+
+  .r-t-left,
+  .r-t-right,
+  .r-bottom {
+    padding: getWidth(2) getHeight(2);
+  }
+
+  .r-top {
+    height: getHeight(63.19);
+    display: flex;
+    justify-content: space-between;
+
+    .r-t-left {
+      width: getWidth(58.38);
+      height: 100%;
+      background-color: #212342;
+      border-radius: getHeight(1) getWidth(1);
+      display: flex;
+      flex-direction: column;
+
+      .search-item {
+        margin-top: getHeight(1.2);
+        display: flex;
+        justify-content: space-around;
+        flex: none;
+        ::v-deep {
+          .el-input__inner {
+            width: getWidth(25.19);
+            height: getHeight(3.75);
+            background: #171833;
+            border: none;
+            font-size: $nomalSize;
+            font-family: PingFangSC-Regular, PingFang SC;
+            font-weight: 400;
+            color: #ffffff;
+            line-height: getHeight(3.75);
+          }
+          .el-select .el-input .el-select__caret {
+            color: rgba(0, 232, 255, 1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          }
+          .el-select-dropdown {
+            background: #020423;
+            border: none;
+          }
+          .el-select-dropdown__item {
+            color: #fff;
+          }
+          .el-select-dropdown__item.hover,
+          .el-select-dropdown__item:hover {
+            background-color: rgba(0, 232, 255, 0.2);
+          }
+          .el-popper[x-placement^="bottom"] .popper__arrow {
+            border-bottom-color: #020423;
+          }
+          .el-popper[x-placement^="bottom"] .popper__arrow::after {
+            border-bottom-color: #020423;
+          }
+        }
+      }
+
+      .content {
+        width: 100%;
+        height: 100%;
+        margin-top: getHeight(2);
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        // flex-wrap: wrap;
+        .ceshi1 {
+          width: 40%;
+          height: 40%;
+          flex: 1;
+          // margin:0 auto;
+          // > .echarts{
+          //   width: 50%;
+          //   height: 50%;
+          // }
+        }
+        .ceshi2 {
+          width: 40%;
+          height: 40%;
+          flex: 1;
+          // > .echarts{
+          //   width: 50%;
+          //   height: 50%;
+          // }
+          // margin:0 auto;
+        }
+        .ceshi3 {
+          width: 100%;
+          height: 40%;
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+        }
+        .ceshi4 {
+          flex: 1;
+          display: flex;
+        }
+        .echarts {
+          width: 100%;
+        }
+        .label {
+          margin-top: getHeight(1);
+          font-family: PingFangSC-Medium;
+          font-size: $nomalSize;
+          font-weight: normal;
+          font-stretch: normal;
+          letter-spacing: 0rem;
+          color: rgba(255, 255, 255, 0.7);
+          text-align: center;
+        }
+        // .chart-item + .chart-item {
+        //   margin-left: getWidth(2.75);
+        // }
+        // .chart-item {
+        //   display: flex;
+        //   flex-direction: column;
+        //   align-items: center;
+        //   text-align: center;
+        //   white-space: nowrap;
+        //   width: calc(50% - #{getWidth(2.75)});
+        //   height: calc(50% - #{getWidth(2.75)});
+
+        //   .label {
+        //     margin-top: getHeight(1);
+        //     font-family: PingFangSC-Medium;
+        //     font-size: $nomalSize;
+        //     font-weight: normal;
+        //     font-stretch: normal;
+        //     letter-spacing: 0rem;
+        //     color: rgba(255, 255, 255, 0.7);
+        //   }
+
+        //   > .echarts {
+        //     width: 100%;
+        //     height: 100%;
+        //   }
+
+        //   font-size: $nomalSmallSize;
+        //   font-family: PingFangSC-Medium, PingFang SC;
+        //   font-weight: 500;
+        //   color: #ffffff;
+        // }
+      }
+    }
+    .r-t-right {
+      width: getWidth(57.13);
+      height: 100%;
+      background-color: #212342;
+      border-radius: getHeight(1) getWidth(1);
+      margin-left: getHeight(1.88);
+
+      display: flex;
+      flex-direction: column;
+
+      .search-content-item {
+        margin-top: getHeight(2.63);
+        margin-bottom: getHeight(2.3);
+        width: 100%;
+        > .label {
+          display: flex;
+          justify-content: space-between;
+          font-size: 0.88rem;
+          font-family: PingFangSC-Medium, PingFang SC;
+          font-weight: 500;
+          color: rgba(#ffffff, 0.9);
+        }
+
+        // 修改滑动条样式
+        ::v-deep {
+          .el-slider__runway {
+            width: 100%;
+            height: getHeight(0.25);
+          }
+          .el-slider__bar {
+            width: 100%;
+            height: getHeight(0.25);
+            border-radius: 0.38rem;
+            background: linear-gradient(
+                135deg,
+                #f5e647,
+                #ffea00,
+                #ffa83b,
+                #fd9617
+              )
+              0/400% 400%;
+            animation: move 2s infinite;
+          }
+          .el-slider__button-wrapper {
+            width: getWidth(0.8);
+            height: getHeight(0.8);
+            top: 50%;
+            margin-top: getHeight(-0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+          }
+          .el-slider__button {
+            width: getWidth(0.4);
+            height: getHeight(0.4);
+            background: linear-gradient(102deg, #ffea00 0%, #ffa83b 100%);
+            box-shadow: 0rem 0rem 0.25rem 0rem rgba(255, 234, 0, 0.3);
+            border: none;
+          }
+          .el-slider__button.hover {
+            transform: scale(2.2);
+          }
+        }
+      }
+    }
+  }
+
+  .r-bottom {
+    height: getHeight(40.63);
+    background-color: #212342;
+    border-radius: getHeight(1) getWidth(1);
+    margin-top: getHeight(1.88);
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.title {
+  font-size: $nomalSize;
+  font-family: PingFangSC-Medium, PingFang SC;
+  font-weight: 500;
+  color: #ffffff;
+  margin-bottom: getHeight(2);
+
+  // 标题三角形
+  .triangle {
+    display: inline-block;
+    font-size: 0;
+    overflow: hidden;
+    margin-right: getWidth(0.6);
+
+    &:before {
+      content: "";
+      position: relative;
+      display: inline-block;
+      border: getWidth(0.3) solid transparent;
+
+      position: relative;
+      right: getWidth(0.1);
+      border-top-right-radius: 50%;
+      border-bottom-right-radius: 50%;
+
+      left: getWidth(0.1);
+      border-right-width: 0;
+      border-left-width: getWidth(0.6);
+      border-left-color: rgb(181, 181, 181);
+    }
+  }
+}
+</style>
+<style lang="scss" scoped>
+@import "~@/styles/big.scss";
+.input-forecast {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  ::v-deep {
+    .el-dialog {
+      width: getWidth(188.88);
+      height: getHeight(106.25);
+      display: flex;
+      flex-direction: column;
+      margin-top: 0 !important;
+    }
+    .el-dialog__header {
+      padding-top: 0;
+      padding-bottom: 0;
+      height: getHeight(7.5);
+      background-color: rgba(#313662, 0.6);
+      position: relative;
+
+      .el-dialog__title {
+        font-family: PingFangSC-Medium;
+        font-size: $itemTitleSize;
+        font-weight: normal;
+        font-stretch: normal;
+        color: #ffffff;
+        line-height: getHeight(7.5);
+        height: 100%;
+      }
+
+      .el-dialog__headerbtn {
+        width: getWidth(2.13);
+        height: getHeight(2.13);
+        top: 50%;
+        font-size: 2.13 * 16px;
+        transform: translateY(-50%);
+        .el-dialog__close {
+          color: #00e0ff;
+        }
+      }
+    }
+    .el-dialog__body {
+      height: calc(100% - #{getHeight(7.5)});
+      background-color: #171833;
+      border-radius: getHeight(1) getWidth(1);
+      border: solid getWidth(0.13) rgba(255, 255, 255, 0.3);
+      border: none;
+      border-radius: 0;
+      padding: 0;
+      background: #212342;
+    }
+  }
+}
+</style>
+<style lang="scss">
+// .ceshi1{flex:1;}
+// .ceshi2{flex:1;}
+// .ceshi3{flex:2;}
+</style>
